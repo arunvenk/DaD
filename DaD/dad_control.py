@@ -5,6 +5,7 @@
 #   DaD originally presented at AAAI 2015.  (https://www.ri.cmu.edu/pub_files/2015/1/Venkatraman.pdf)
 #
 # Copyright 2016 Arun Venkatraman (arunvenk@cs.cmu.edu).
+#                Roberto Capobianco (capobianco@dis.uniroma1.it) 
 # License provided with repository.
 #
 
@@ -42,8 +43,7 @@ class DaDControl(object):
         # The maximum number of aggregated data points to keep. If exceed, random 
         # permutation of data points is kept between DAgger iterations
         self.MAX_TRAIN_SIZE = max_train_size;
-        self.MAX_DATA_SIZE =
-        max_data_sizemax_data_sizemax_data_sizemax_data_sizemax_data_sizemax_data_sizemax_data_sizemax_data_size;
+        self.MAX_DATA_SIZE = max_data_size
 
     def learn(self, Xs, Us, learner, dagger_iters = 20, Xtest = None, Utest = None, verbose = True):
         """ Trains a Dynamical System using Data As Demonstrator + Control 

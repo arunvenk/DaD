@@ -20,22 +20,36 @@ from sklearn.linear_model.ridge import Ridge
 # Choose the system to use. Needs to follow a common api.
 SYSTEM = CartPole
 
+def x0_low_high(system):
+    """Lower and higher bound for random intitial state generation. """
+    if system == CartPole:
+        x0_low = np.array([-1, -1, -np.pi, -0.5])
+        x0_high = np.array([1, 1, np.pi, 0.5])
+    else:
+        raise Exception('No x0 bounds defined for this sytem') 
+    return x0_low, x0_high
+
 def run_episodes(policy, num_episodes, T):
+    """Generate num_episodes runs of the SYSTEM. """
+    # Lower and higher bound for random intitial state generation.
+    x0_low, x0_high = x0_low_high(SYSTEM)
     all_states = []; all_actions = []; 
     for i in range(num_episodes):
-        states, actions = run_trial(policy, T)
+        x0 = x0_low + (x0_high-x0_low)*np.random.random(4)
+        states, actions = run_trial(policy, T, x0)
         all_states.append(states)
         all_actions.append(actions)
     return np.stack(all_states, axis=2), np.dstack(all_actions).transpose((1,0,2))
 
 def run_trial(policy, T, x0 = np.array((0, 0, np.pi/2., 0))):
-    # initial state
+    """Generate T timesteps of data from the SYSTEM. """
+    # Initialize the system at x0.
     system = SYSTEM(x0)
     DT = 0.10 # simulate at 10 Hz
     xt = x0.copy()
     for t in xrange(T):
         ut = policy.u(xt) 
-        xt = system.step(DT, ut, sigma=1e-3+SYSTEM.state_dim())
+        xt = system.step(DT, ut, sigma=1e-3+np.zeros(SYSTEM.state_dim()))
     X = system.get_states()
     U = system.get_controls()
     return X, U
@@ -74,7 +88,7 @@ def optimize_learner_dad(learner, X, U, iters, train_size = 0.5):
 
 if __name__ == "__main__":
     print('Defining the learner')
-    learner = DynamicsControlDeltaWrapper(Ridge(alpha=1e-7, fit_intercept=True))
+    learner = DynamicsControlDeltaWrapper(Ridge(alpha=1e-4, fit_intercept=True))
 
     NUM_EPISODES = 50
     T = 50
